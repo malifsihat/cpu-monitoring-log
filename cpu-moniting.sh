@@ -11,6 +11,23 @@ log_usage() {
     echo "$timestamp - Service: $service, Path: $path, CPU Usage: $cpu_usage%, RAM Usage: $ram_usage%" >> cpu-monitor.log
 }
 
+# Function to check and overwrite the log file after 1 days
+overwrite_log_file() {
+    local log_file="system-monitor.log"
+    local threshold_days=1
+
+    if [ -f "$log_file" ]; then
+        local last_modified=$(stat -c %Y "$log_file")
+        local current_time=$(date +%s)
+        local age=$(( (current_time - last_modified) / 86400 )) # Calculate age in days
+
+        if [ $age -ge $threshold_days ]; then
+            mv "$log_file" "${log_file}.old"
+            echo "Log file overwritten at $(date +"%Y-%m-%d %H:%M:%S")" > "$log_file"
+        fi
+    fi
+}
+
 # Main loop to monitor usage
 while true; do
     # Get the current timestamp
